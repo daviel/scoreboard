@@ -1,14 +1,5 @@
 'use strict';
 
-/*
- * Logitech R400 key/keypress-event mapping:
- * 				key	which	code	char
- * left:		33	0		0		!		PageUp		point left
- * right:		34	0		0		"		PageDown	point right
- * black:		0	46		46		.		.			start/stop time
- * start/stop:	116	0		0		t		Escape/F5	refresh
- */
-
 var matchEnded = false;
 
 function endMatch() {
@@ -29,8 +20,9 @@ var config = {
 	// keys
 	pointLeft: "PageUp",
 	pointRight: "PageDown",
-	toggleTime: ".",
-	reset: "Escape"
+	reset: ".",
+	toggleTime: "Escape",
+	toggleTime2: "F5"
 };
 
 var time = {
@@ -74,7 +66,7 @@ var time = {
 			if (time.currentTime > config.maxTime * 1000) {
 				endMatch();
 			}
-			window.setTimeout(time.updateTime, 250);
+			window.setTimeout(time.updateTime, 100);
 		}
 	}
 };
@@ -109,19 +101,34 @@ var score = {
 function keyHandle(event) {
 	switch(event.key) {
 		case config.pointLeft:
-			score.addPoint(1, 0);
+			event.preventDefault();
+			if (event.shiftKey) {
+				score.addPoint(-1, 0);
+			} else {
+				score.addPoint(1, 0);
+			}
 			break;
 		case config.pointRight:
-			score.addPoint(0, 1);
-			break;
-		case config.toggleTime:
-			time.toggleTime();
+			event.preventDefault();
+			if (event.shiftKey) {
+				score.addPoint(0, -1);
+			} else {
+				score.addPoint(0, 1);
+			}
 			break;
 		case config.reset:
-			// location.reload(true) doesn't reset js-objects??
+			event.preventDefault();
 			score.reset();
 			time.reset();
 			matchEnded = false;
+			break;
+		case config.toggleTime:
+			event.preventDefault();
+			time.toggleTime();
+			break;
+		case config.toggleTime2:
+			event.preventDefault();
+			time.toggleTime();
 			break;
 	}
 }
