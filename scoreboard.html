@@ -24,5 +24,28 @@
 			<div id="scoreId"><span id="scoreLeftId">0</span><span id="separatorScoreId">:</span><span id="scoreRightId">0</span></div>
 			<div id="timeId"><span id="minutesId">0</span><span id="separatorTimeId">:</span><span id="secondsId">00</span></div>
 		</main>
+		<footer>
+			<div id="matchTypeId">
+				<input type="radio"
+					name="matchTypes"
+					id="poolMatch"
+					value="poolMatch"
+					checked="checked"
+					onchange="scoreboard.getSelectedMatchType();" />
+				<label for="poolMatch">pool match</label>
+
+				<input type="radio"
+					name="matchTypes"
+					id="knockoutMatch"
+					value="knockoutMatch"
+					onchange="scoreboard.getSelectedMatchType();" />
+				<label for="knockoutMatch">knockout match</label>
+			</div>
+			<div id="logId">
+			</div>
+		</footer>
+		<script type="text/javascript">
+			scoreboard.getSelectedMatchType();
+		</script>
 	</body>
 </html>

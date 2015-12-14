@@ -13,4 +13,6 @@ The current configuration maps to the [Logitech R400](http://www.logitech.com/en
 |substract point left|`Shift+PageUp`|
 |substract point right|`Shift+PageDown`|
 |start/stop time|`Escape` or `F5`|
-|reset|`.`|
+|reset|double `.`|
+
+You can also switch between two match types easily (values defined in config object) and there is a log for your last actions in case you mistyped.

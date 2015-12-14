@@ -13,6 +13,7 @@ main {
 
 #scoreId {
 	font-size: 50vmin;
+	margin: -3vmin 0vmin;
 }
 
 #scoreLeftId {
@@ -26,6 +27,7 @@ main {
 
 #timeId {
 	font-size: 35vmin;
+	margin: -1vmin 0vmin;
 }
 
 #minutesId {
@@ -35,4 +37,17 @@ main {
 }
 
 #secondsId {
+}
+
+#matchTypeId {
+	position: absolute;
+	left: 1vmin;
+	bottom: 1vmin;
+}
+
+#logId {
+	position: absolute;
+	right: 1vmin;
+	bottom: 1vmin;
+	text-align: right;
 }

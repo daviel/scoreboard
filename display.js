@@ -1,138 +1,218 @@
 'use strict';
 
-var matchEnded = false;
-
-function endMatch() {
-	if (time.running) {
-		time.toggleTime();
-	}
-
-	matchEnded = true;
-}
-
 var config = {
-	// maximum time in seconds
-	maxTime: 300,
-
-	// maximum points
-	maxScore: 5,
-
-	// keys
+	lastKeyPressTime: 0,
 	pointLeft: "PageUp",
 	pointRight: "PageDown",
 	reset: ".",
 	toggleTime: "Escape",
-	toggleTime2: "F5"
+	toggleTime2: "F5",
+
+	enableDoublePress: true,
+	doubePressDelay: 500,
+
+	keySoundFilePath: "sound.ogg",
+
+	maxScore: 5,
+	maxTime: 300,
+
+	handleKey: function(event) {
+		function defaultKeyAction() {
+			event.preventDefault();
+			new Audio(config.keySoundFilePath).play();
+			game.logStatus();
+		}
+
+		var keyPressTime = new Date();
+		switch (event.key) {
+			case config.pointLeft:
+				if (event.shiftKey) {
+					game.score.addPoint(-1, 0);
+				} else {
+					game.score.addPoint(1, 0);
+				}
+				defaultKeyAction();
+				break;
+			case config.pointRight:
+				if (event.shiftKey) {
+					game.score.addPoint(0, -1);
+				} else {
+					game.score.addPoint(0, 1);
+				}
+				defaultKeyAction();
+				break;
+			case config.reset:
+				var isDoublePress = keyPressTime - this.lastKeyPressTime < config.doubePressDelay;
+				if (isDoublePress || !config.enableDoublePress) {
+					game.reset();
+				}
+				this.lastKeyPressTime = keyPressTime;
+				defaultKeyAction();
+				break;
+			case config.toggleTime:
+				game.time.toggleTime();
+				defaultKeyAction();
+				break;
+			case config.toggleTime2:
+				game.time.toggleTime();
+				defaultKeyAction();
+				break;
+		}
+	},
+
+	setMaxValues: function(maxScore, maxTime) {
+		this.maxScore = maxScore;
+		this.maxTime = maxTime;
+
+		game.reset();
+	}
 };
 
-var time = {
-	currentTime: 0,
-	lastTimestamp: 0,
-	running: false,
+var game = {
+	matchEnded: false,
+
+	endMatch: function() {
+		if (this.time.running) {
+			this.time.toggleTime();
+		}
+
+		game.matchEnded = true;
+	},
+
+	logStatus: function() {
+		var minutesSeconds = this.time.convertToMinutesSeconds(this.time.currentTime);
+		var logMessage = minutesSeconds[0] + ":" + minutesSeconds[1] + " " + this.score.scoreLeft + ":" + this.score.scoreRight;
+		console.log(logMessage);
+		scoreboard.logStatus(logMessage);
+	},
 
 	reset: function() {
-		this.currentTime = 0;
-		this.lastTimestamp = 0;
-		this.running = false;
-		this.updateScoreboard();
+		this.score.reset();
+		this.time.reset();
+		this.matchEnded = false;
 	},
 
-	toggleTime: function () {
-		if (!matchEnded) {
-			if (this.running) {
-				// stop time
-				this.running = false;
-			} else {
-				// start time
-				this.running = true;
-				this.lastTimestamp = Date.now() - this.currentTime;
-				this.updateTime();
+	score: {
+		scoreLeft: 0,
+		scoreRight: 0,
+
+		addPoint: function(left, right) {
+			if (!game.matchEnded) {
+				this.scoreLeft += left;
+				this.scoreRight += right;
+				if (this.scoreRight >= config.maxScore || this.scoreLeft >= config.maxScore) {
+					game.endMatch();
+				}
+				scoreboard.updateScore(this.scoreLeft, this.scoreRight);
 			}
+		},
+
+		reset: function() {
+			this.scoreLeft = 0;
+			this.scoreRight = 0;
+			scoreboard.updateScore(this.scoreLeft, this.scoreRight);
 		}
 	},
 
-	updateScoreboard: function() {
-		var seconds = Math.round(time.currentTime / 1000);
-		var minutes = Math.floor(seconds / 60);
-		seconds = (seconds % 60 < 10) ? "0" + seconds % 60 : seconds % 60;
-		document.getElementById("minutesId").textContent = minutes;
-		document.getElementById("secondsId").textContent = seconds;
-	},
+	time: {
+		currentTime: 0,
+		lastTimestamp: 0,
+		running: false,
 
-	updateTime: function(){
-		if (time.running) {
-			time.currentTime = Date.now() - time.lastTimestamp;
-			time.updateScoreboard();
-			if (time.currentTime > config.maxTime * 1000) {
-				endMatch();
+		convertToMinutesSeconds: function(milliseconds) {
+			var seconds = Math.round(milliseconds / 1000);
+			var minutes = Math.floor(seconds / 60);
+			seconds = (seconds % 60 < 10) ? "0" + seconds % 60 : seconds % 60;
+			return [minutes, seconds];
+		},
+
+		reset: function() {
+			this.currentTime = 0;
+			this.lastTimestamp = 0;
+			this.running = false;
+			scoreboard.updateTime(this.convertToMinutesSeconds(this.currentTime));
+		},
+
+		start: function() {
+			this.running = true;
+			this.lastTimestamp = Date.now() - this.currentTime;
+			this.update();
+		},
+
+		stop: function() {
+			this.running = false;
+		},
+
+		toggleTime: function () {
+			if (!game.matchEnded) {
+				if (this.running) {
+					this.stop();
+				} else {
+					this.start();
+				}
 			}
-			window.setTimeout(time.updateTime, 100);
+		},
+
+		update: function(){
+			if (game.time.running) {
+				game.time.currentTime = Date.now() - game.time.lastTimestamp;
+				scoreboard.updateTime(game.time.convertToMinutesSeconds(game.time.currentTime));
+				if (game.time.currentTime > config.maxTime * 1000) {
+					game.endMatch();
+				}
+				window.setTimeout(game.time.update, 100);
+			}
 		}
 	}
 };
 
-var score = {
-	scoreLeft: 0,
-	scoreRight: 0,
+var scoreboard = {
+	log: ["","",""],
 
-	addPoint: function(left, right) {
-		if (!matchEnded) {
-			this.scoreLeft += left;
-			this.scoreRight += right;
-			this.updateScoreboard();
-			if (this.scoreRight >= config.maxScore || this.scoreLeft >= config.maxScore) {
-				endMatch();
+	getSelectedMatchType: function() {
+		var matchTypes = document.getElementsByName("matchTypes");
+		var selectedMatchType;
+		for (var i = 0; i < matchTypes.length; i++) {
+			if(matchTypes[i].checked == true) {
+				selectedMatchType = matchTypes[i].value;
+				break;
 			}
+		}
+
+		switch (selectedMatchType) {
+			case "poolMatch":
+				config.setMaxValues(5, 300);
+				break;
+			case "knockoutMatch":
+				config.setMaxValues(10, 600);
+				break;
 		}
 	},
 
-	reset: function() {
-		this.scoreLeft = 0;
-		this.scoreRight = 0;
-		this.updateScoreboard();
+	logStatus: function(logMessage) {
+		for (var i = this.log.length - 1; i > 0; i--) {
+			this.log[i] = this.log[i - 1];
+		}
+		this.log[0] = logMessage;
+
+		var html = "";
+		for (var i = this.log.length - 1; i >= 0; i--) {
+			html += "<div>" + this.log[i] + "</div>";
+		}
+		document.getElementById("logId").innerHTML = html;
 	},
 
-	updateScoreboard: function() {
-		document.getElementById("scoreLeftId").textContent = this.scoreLeft;
-		document.getElementById("scoreRightId").textContent = this.scoreRight;
+	updateScore: function(scoreLeft, scoreRight) {
+		document.getElementById("scoreLeftId").textContent = scoreLeft;
+		document.getElementById("scoreRightId").textContent = scoreRight;
+	},
+
+	updateTime: function(minutesSeconds) {
+		document.getElementById("minutesId").textContent = minutesSeconds[0];
+		document.getElementById("secondsId").textContent = minutesSeconds[1];
 	}
 };
-
-function keyHandle(event) {
-	switch(event.key) {
-		case config.pointLeft:
-			event.preventDefault();
-			if (event.shiftKey) {
-				score.addPoint(-1, 0);
-			} else {
-				score.addPoint(1, 0);
-			}
-			break;
-		case config.pointRight:
-			event.preventDefault();
-			if (event.shiftKey) {
-				score.addPoint(0, -1);
-			} else {
-				score.addPoint(0, 1);
-			}
-			break;
-		case config.reset:
-			event.preventDefault();
-			score.reset();
-			time.reset();
-			matchEnded = false;
-			break;
-		case config.toggleTime:
-			event.preventDefault();
-			time.toggleTime();
-			break;
-		case config.toggleTime2:
-			event.preventDefault();
-			time.toggleTime();
-			break;
-	}
-}
 
 window.onload = function(){
-	document.onkeypress = keyHandle;
+	document.onkeypress = config.handleKey;
 }
