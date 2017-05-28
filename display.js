@@ -17,11 +17,7 @@ var config = {
 	maxTime: 300,
 
 	handleKey: function(event) {
-		function defaultKeyAction() {
-			event.preventDefault();
-			new Audio(config.keySoundFilePath).play();
-			game.logStatus();
-		}
+		event.preventDefault();
 
 		var keyPressTime = new Date();
 		switch (event.key) {
@@ -31,7 +27,6 @@ var config = {
 				} else {
 					game.score.addPoint(1, 0);
 				}
-				defaultKeyAction();
 				break;
 			case config.pointRight:
 				if (event.shiftKey) {
@@ -39,25 +34,22 @@ var config = {
 				} else {
 					game.score.addPoint(0, 1);
 				}
-				defaultKeyAction();
 				break;
 			case config.reset:
 				var isDoublePress = keyPressTime - this.lastKeyPressTime < config.doubePressDelay;
+				this.lastKeyPressTime = keyPressTime;
 				if (isDoublePress || !config.enableDoublePress) {
 					game.reset();
 				}
-				this.lastKeyPressTime = keyPressTime;
-				defaultKeyAction();
 				break;
 			case config.toggleTime:
-				game.time.toggleTime();
-				defaultKeyAction();
-				break;
 			case config.toggleTime2:
 				game.time.toggleTime();
-				defaultKeyAction();
 				break;
 		}
+
+		new Audio(config.keySoundFilePath).play();
+		game.logStatus();
 	},
 
 	setMaxValues: function(maxScore, maxTime) {
