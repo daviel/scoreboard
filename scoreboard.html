@@ -2,48 +2,38 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<meta name="description"
-			content="A simple scoreboard that shows time and points designed to be used with a presenter.">
-		<meta name="author"
-			content="Paul Jähne">
-
-		<title>Scoreboard</title>
-
-		<script type="text/javascript"
-			src="display.js"></script>
-
-		<link rel="stylesheet"
-			type="text/css"
-			href="style.css" />
-		<link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH3wsdEQcDMbO0MwAAAzJJREFUeNrtmc9LKlEUx48zVBOUo9DGiH5hG2sdBOnYqpatBiqKgvo7KvxD2rQKJP0DGkEoda9MKDjVplWUFWSQnZZ55r1mrj3es/s8By5y8HzPvX4cr/ecGwAAhB42BXrcGAADYAAMgAEwAAbAABgAA2AADIAByGSapoFpmpBOp8G2bWg0GtBoNMC2bUin02CaJmia5psn4O4HhMNhiEajEI1GYWZmhryOjIxQcSDQlQ+fTCbh6OgIJicnPeMcx4Ht7W3I5/Oecdg+OjG39l+Mzc1NbLVawmtstVq4trbmlVMeAIZh4OvrK1nD6ekpxuNx1HUdQ6EQGoaB2WyWxDSbTVxcXBQDcHd3h8ViEY+Pj3F/fx83NjZwfn4ew+FwVwGoqoq2bZP5Dw8Pv4xPpVIktlwuo6Io/gC8RjcB7O7ukrkty/LV5HI5otnZ2ZEXQKlUInMnEgmhn0y7nZ+fywlgbGyMbHy1Wk1YW6vVyIYYiUTI+1KcA5aXl0FRPpdqWZawNpfLfR56FAVWVlZ+xkEIEcnwsrm5OeIXi0XheQqFgmcuKZ6AWCxG/Hq9Lqx1HMczlxQA3Ce+m5sbYe319TXxp6am5AMQDAaJf39/L6x9eHgg/vDwsHwAhoaGiP/y8iKsdce6c/1SDPltXN0oht7e3kBVVbKb+22c7Wt8f38nufr6+uR6AtzfYn9/v7B2YGDAM5cUAJ6fn4k/ODgorHXHPj09yQfg8fGR+KFQSFir67r8ANx/ZePj48LaiYkJ4l9dXckHoFKpEH96elpY645155ICQLlcJv7CwoKw1h3rziVNNdhu1WpVWFutVkk1ODo6+n/0A+LxuK8mkUgQzcXFhbwNkb29PTL32dmZr8ayrJ/bEeo0l6qqeHl5STQHBwfy9gS/kyuZTH7ZFQ4Gg6jr+p93hTttjX+3Xf5dmFtbWx3fC6yvr4vfC/x0AACAS0tL6DiO7zrq9ToahuGZ67fVoGil5VWB/e3KUtM0WF1dBdM0YXZ2FiKRCAAA3N7eQqVSgZOTE8hkMtBsNju7G+w14+txBsAAGAADYAAMgAEwAAbAABgAA2AADIABMAAG0GP2ATpRjFQ5GtKIAAAAAElFTkSuQmCC"
-			rel="icon"
-			type="image/x-icon" />
+		<meta name="description" content="A simple scoreboard that shows time and points designed to be used with a presenter.">
+		<meta name="author"	content="David Krawiec">
+		<title>Punktetafel</title>
+		<script type="text/javascript" src="display.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css" />
 	</head>
 	<body>
 		<main>
-			<div id="scoreId"><span id="scoreLeftId">0</span><span id="separatorScoreId">:</span><span id="scoreRightId">0</span></div>
-			<div id="timeId"><span id="minutesId">0</span><span id="separatorTimeId">:</span><span id="secondsId">00</span></div>
+			<div id="teams">
+				<input id="teamHomeName" type="text" value="Heim">
+				<span id="teamSeperator"></span>
+				<input id="teamGuestName" type="text" value="Gast">
+			</div>
+			<div id="scoreId">
+				<span id="scoreLeftId">0</span>
+				<span id="separatorScoreId">:</span>
+				<span id="scoreRightId">0</span>
+			</div>
+			<div id="timeId">
+				<span id="minutesId">0</span>
+				<span id="separatorTimeId">:</span>
+				<span id="secondsId">00</span>
+			</div>
+			<div id="overtimeId">
+				<span id="overtimeSymbol">+</span>
+				<span id="overtimeMinutesId">0</span>
+				<span id="separatorTimeId">:</span>
+				<span id="overtimeSecondsId">00</span>
+			</div>
 		</main>
-		<footer>
-			<div id="matchTypeId">
-				<input type="radio"
-					name="matchTypes"
-					id="poolMatch"
-					value="poolMatch"
-					checked="checked"
-					onchange="scoreboard.getSelectedMatchType();" />
-				<label for="poolMatch">pool match</label>
-
-				<input type="radio"
-					name="matchTypes"
-					id="knockoutMatch"
-					value="knockoutMatch"
-					onchange="scoreboard.getSelectedMatchType();" />
-				<label for="knockoutMatch">knockout match</label>
-			</div>
-			<div id="logId">
-			</div>
-		</footer>
+		<div id="logId">
+		</div>
 		<script type="text/javascript">
 			scoreboard.getSelectedMatchType();
 		</script>

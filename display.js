@@ -2,39 +2,47 @@
 
 var config = {
 	lastKeyPressTime: 0,
-	pointLeft: "PageUp",
-	pointRight: "PageDown",
+
+	incPointLeft: "q",
+	decPointLeft: "w",
+	addPointRight: "i",
+	decPointRight: "o",
+
 	reset: ".",
-	toggleTime: "Escape",
-	toggleTime2: "F5",
+	toggleTime: " ", // space
+	toogleColors: "c",
+	toogleOvertime: "y",
 
 	enableDoublePress: true,
 	doubePressDelay: 500,
 
-	keySoundFilePath: "sound.ogg",
-
-	maxScore: 5,
-	maxTime: 300,
+	halfTime: 45 * 60, // in seconds
+	endTime: 90 * 60, // in seconds
 
 	handleKey: function(event) {
+		if(document.activeElement.nodeName == "INPUT" || event.key == "F11"){
+			// If we want to edit the teams names we don't grab the keyboard inputs
+			return;
+		}
 		event.preventDefault();
 
 		var keyPressTime = new Date();
 		switch (event.key) {
-			case config.pointLeft:
-				if (event.shiftKey) {
-					game.score.addPoint(-1, 0);
-				} else {
+			case config.incPointLeft:
 					game.score.addPoint(1, 0);
-				}
 				break;
-			case config.pointRight:
-				if (event.shiftKey) {
-					game.score.addPoint(0, -1);
-				} else {
+			case config.decPointLeft:
+					game.score.addPoint(-1, 0);
+				break;
+			case config.addPointRight:
 					game.score.addPoint(0, 1);
-				}
 				break;
+			case config.decPointRight:
+				game.score.addPoint(0, -1);
+			break;
+			case config.toogleOvertime:
+				game.time.endOverTime()
+			break;
 			case config.reset:
 				var isDoublePress = keyPressTime - this.lastKeyPressTime < config.doubePressDelay;
 				this.lastKeyPressTime = keyPressTime;
@@ -43,33 +51,18 @@ var config = {
 				}
 				break;
 			case config.toggleTime:
-			case config.toggleTime2:
 				game.time.toggleTime();
 				break;
+			case config.toogleColors:
+				game.toggleColors();
+				break;
 		}
-
-		new Audio(config.keySoundFilePath).play();
-		game.logStatus();
 	},
 
-	setMaxValues: function(maxScore, maxTime) {
-		this.maxScore = maxScore;
-		this.maxTime = maxTime;
-
-		game.reset();
-	}
 };
 
 var game = {
-	matchEnded: false,
-
-	endMatch: function() {
-		if (this.time.running) {
-			this.time.toggleTime();
-		}
-
-		game.matchEnded = true;
-	},
+	colorBlack: true,
 
 	logStatus: function() {
 		var minutesSeconds = this.time.convertToMinutesSeconds(this.time.currentTime);
@@ -81,7 +74,6 @@ var game = {
 	reset: function() {
 		this.score.reset();
 		this.time.reset();
-		this.matchEnded = false;
 	},
 
 	score: {
@@ -89,14 +81,10 @@ var game = {
 		scoreRight: 0,
 
 		addPoint: function(left, right) {
-			if (!game.matchEnded) {
-				this.scoreLeft += left;
-				this.scoreRight += right;
-				if (this.scoreRight >= config.maxScore || this.scoreLeft >= config.maxScore) {
-					game.endMatch();
-				}
-				scoreboard.updateScore(this.scoreLeft, this.scoreRight);
-			}
+			this.scoreLeft += left;
+			this.scoreRight += right;
+			scoreboard.updateScore(this.scoreLeft, this.scoreRight);
+			game.logStatus();
 		},
 
 		reset: function() {
@@ -106,8 +94,29 @@ var game = {
 		}
 	},
 
+	toggleColors: function () {
+		if (this.colorBlack) {
+			this.setColor("black", "white");
+		} else {
+			this.setColor("white", "black");
+		}
+		this.colorBlack = !this.colorBlack;
+	},
+
+	setColor: function (backgroundColor, foregroundColor) {
+		var nodes = document.querySelectorAll("body, html, input");
+		nodes.forEach(function(node){
+			node.style.color = foregroundColor;
+			node.style.backgroundColor = backgroundColor;
+		});
+	},
+
 	time: {
+		secondHalf: false,
+		overtimeIsOn: false,
+		currentOvertime: 0,
 		currentTime: 0,
+		lastOverTimestamp: 0,
 		lastTimestamp: 0,
 		running: false,
 
@@ -119,15 +128,42 @@ var game = {
 		},
 
 		reset: function() {
+			this.overtimeIsOn = false;
+			this.currentOvertime = 0;
+			this.lastOverTimestamp = 0;
+
 			this.currentTime = 0;
 			this.lastTimestamp = 0;
 			this.running = false;
+			game.time.secondHalf = false;
 			scoreboard.updateTime(this.convertToMinutesSeconds(this.currentTime));
+			game.time.hideOvertime();
+		},
+
+		endOverTime: function() {
+			if(game.time.secondHalf == false){
+				game.time.secondHalf = true;
+
+				this.overtimeIsOn = false;
+				this.currentOvertime = 0;
+				this.lastOverTimestamp = 0;
+
+				this.currentTime = config.halfTime * 1000;
+				this.lastTimestamp = 0;
+				this.running = false;
+
+				scoreboard.updateTime(this.convertToMinutesSeconds(this.currentTime));
+				scoreboard.updateOvertime(game.time.convertToMinutesSeconds(game.time.currentOvertime));
+				game.time.hideOvertime();
+			} else {
+				game.time.reset()
+			}
 		},
 
 		start: function() {
 			this.running = true;
 			this.lastTimestamp = Date.now() - this.currentTime;
+			this.lastOverTimestamp = Date.now() - this.currentOvertime;
 			this.update();
 		},
 
@@ -136,21 +172,48 @@ var game = {
 		},
 
 		toggleTime: function () {
-			if (!game.matchEnded) {
-				if (this.running) {
-					this.stop();
-				} else {
-					this.start();
-				}
+			if (this.running) {
+				this.stop();
+			} else {
+				this.start();
 			}
+		},
+
+		hideOvertime: function () {
+			game.time.overtimeIsOn = false;
+			document.getElementById("overtimeId").style.display = "none";
+		},
+
+		showOvertime: function () {
+			game.time.overtimeIsOn = true;
+			document.getElementById("overtimeId").style.display = "block";
+		},
+
+		toggleOvertime: function () {
+			if(game.time.overtimeIsOn){
+				game.time.hideOvertime();
+			} else {
+				game.time.showOvertime();
+			}
+			game.time.lastOverTimestamp = Date.now();
 		},
 
 		update: function(){
 			if (game.time.running) {
-				game.time.currentTime = Date.now() - game.time.lastTimestamp;
-				scoreboard.updateTime(game.time.convertToMinutesSeconds(game.time.currentTime));
-				if (game.time.currentTime > config.maxTime * 1000) {
-					game.endMatch();
+				if(game.time.overtimeIsOn == false){
+					if (game.time.currentTime >= config.halfTime * 1000 && game.time.secondHalf == false) {
+						game.time.toggleOvertime();
+						scoreboard.updateTime(game.time.convertToMinutesSeconds(config.halfTime));
+					} else if (game.time.currentTime >= config.endTime * 1000) {
+						game.time.toggleOvertime();
+						scoreboard.updateTime(game.time.convertToMinutesSeconds(config.endTime));
+					}
+					game.time.currentTime = Date.now() - game.time.lastTimestamp;
+					scoreboard.updateTime(game.time.convertToMinutesSeconds(game.time.currentTime));
+				}
+				else {
+					game.time.currentOvertime = Date.now() - game.time.lastOverTimestamp;
+					scoreboard.updateOvertime(game.time.convertToMinutesSeconds(game.time.currentOvertime));
 				}
 				window.setTimeout(game.time.update, 100);
 			}
@@ -169,15 +232,6 @@ var scoreboard = {
 				selectedMatchType = matchTypes[i].value;
 				break;
 			}
-		}
-
-		switch (selectedMatchType) {
-			case "poolMatch":
-				config.setMaxValues(5, 300);
-				break;
-			case "knockoutMatch":
-				config.setMaxValues(10, 600);
-				break;
 		}
 	},
 
@@ -202,6 +256,11 @@ var scoreboard = {
 	updateTime: function(minutesSeconds) {
 		document.getElementById("minutesId").textContent = minutesSeconds[0];
 		document.getElementById("secondsId").textContent = minutesSeconds[1];
+	},
+
+	updateOvertime: function(minutesSeconds) {
+		document.getElementById("overtimeMinutesId").textContent = minutesSeconds[0];
+		document.getElementById("overtimeSecondsId").textContent = minutesSeconds[1];
 	}
 };
 

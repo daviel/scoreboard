@@ -1,7 +1,10 @@
+html, body, input {
+	color: black;
+	background-color: white;
+}
+
 html, body {
 	font-family: sans-serif, Arial;
-	color: white;
-	background-color: black;
 
 	margin: 0;
 	padding: 0;
@@ -9,11 +12,38 @@ html, body {
 
 main {
 	text-align: center;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 100vw;
+}
+
+#teams {}
+
+#teams input {
+	width: 45%;
+	padding: 0px;
+	background: none;
+	font-size: 8vmin;
+	border: 0px;
+}
+
+#teamHomeName {
+	text-align: right;
+}
+
+#teamGuestName {
+	text-align: left;
+}
+
+#teamSeperator{
+	display: inline-block;
+	width: 8%;
 }
 
 #scoreId {
-	font-size: 50vmin;
-	margin: -3vmin 0vmin;
+	font-size: 35vmin;
 }
 
 #scoreLeftId {
@@ -26,8 +56,7 @@ main {
 }
 
 #timeId {
-	font-size: 35vmin;
-	margin: -1vmin 0vmin;
+	font-size: 15vmin;
 }
 
 #minutesId {
@@ -37,6 +66,21 @@ main {
 }
 
 #secondsId {
+}
+
+#overtimeSymbol{
+	display: inline-block;
+}
+
+#overtimeId {
+	font-size: 8vmin;
+	display: none;
+}
+
+#overtimeMinutesId {
+}
+
+#overtimeSecondsId {
 }
 
 #matchTypeId {
@@ -50,4 +94,14 @@ main {
 	right: 1vmin;
 	bottom: 1vmin;
 	text-align: right;
+	font-size: 3em;
+}
+
+
+
+@media screen and (max-width: 900px) {
+	#scoreId {
+		font-size: 25vmin;
+	}
+
 }
