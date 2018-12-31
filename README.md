@@ -3,7 +3,10 @@
 ![](/scoreboard.png)
 
 A simple scoreboard that shows time and points designed to be used with a presenter. Use it in combination with a standard keyboard.  
-This scoreboard is intended for a regular football match including overtime, half time and a second half with overtime. It is adaptive to every screen size and shows a log of the last three goals with their times. You can toggle the colors using the c key.
+This scoreboard is intended for a regular football match including overtime, half time and a second half with overtime. It is adaptive to every screen size and shows a log of the last three goals with their times. You can toggle the colors using the c key.  
+You can also change the teams names by clicking on them and type in proper names for the home team and the guest team.
+
+
 
 |function|key|
 |--------|---|
