@@ -11,9 +11,9 @@
 	<body>
 		<main>
 			<div id="teams">
-				<input id="teamHomeName" type="text" value="Heim">
+				<textarea id="teamHomeName">Hannover 96</textarea>
 				<span id="teamSeperator"></span>
-				<input id="teamGuestName" type="text" value="Gast">
+				<textarea id="teamGuestName">FC Bayern München</textarea>
 			</div>
 			<div id="scoreId">
 				<span id="scoreLeftId">0</span>
@@ -31,7 +31,14 @@
 				<span id="separatorTimeId">:</span>
 				<span id="overtimeSecondsId">00</span>
 			</div>
+			<div id="commentId">
+				<textarea id="commentText">1. Halbzeit</textarea>
+			</div>
+			<input id="imageUploadId" type="file">
 		</main>
+		<div id="imageId">
+			<img id ="imageShowId" src="">
+		</div>
 		<div id="logId">
 		</div>
 		<script type="text/javascript">

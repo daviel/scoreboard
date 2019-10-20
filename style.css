@@ -1,3 +1,7 @@
+* {
+	overflow: hidden;
+}
+
 html, body, input {
 	color: black;
 	background-color: white;
@@ -21,12 +25,15 @@ main {
 
 #teams {}
 
-#teams input {
-	width: 45%;
+#teams input, textarea {
+	width: 46%;
+	height: 2.5em;
 	padding: 0px;
 	background: none;
-	font-size: 8vmin;
+	font-size: 5em;
 	border: 0px;
+	resize: none;
+	overflow: hidden;
 }
 
 #teamHomeName {
@@ -39,11 +46,11 @@ main {
 
 #teamSeperator{
 	display: inline-block;
-	width: 8%;
+	width: 6%;
 }
 
 #scoreId {
-	font-size: 35vmin;
+	font-size: 20em;
 }
 
 #scoreLeftId {
@@ -56,7 +63,7 @@ main {
 }
 
 #timeId {
-	font-size: 15vmin;
+	font-size: 8em;
 }
 
 #minutesId {
@@ -73,7 +80,7 @@ main {
 }
 
 #overtimeId {
-	font-size: 8vmin;
+	font-size: 6em;
 	display: none;
 }
 
@@ -97,11 +104,36 @@ main {
 	font-size: 3em;
 }
 
+#commentId {
+	position: absolute;
+	bottom: 0px;
+	left: 40%;
+	transform: translate(-100%, 0%);
+}
+
+#commentText {
+	height: 1.5em;
+	font-size: 4em;
+	width: 500px;
+}
+
+#imageUploadId, #imageId{
+	display: none;
+}
+
+#imageShowId{
+	text-align: center;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 100vw;
+}
 
 
 @media screen and (max-width: 900px) {
 	#scoreId {
-		font-size: 25vmin;
+		font-size: 16em;
 	}
 
 }

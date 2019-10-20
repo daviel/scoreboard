@@ -8,10 +8,18 @@ var config = {
 	addPointRight: "i",
 	decPointRight: "o",
 
+	incTimeMinutes: "e",
+	decTimeMinutes: "r",
+	incTimeSeconds: "t",
+	decTimeSeconds: "z",
+
 	reset: ".",
 	toggleTime: " ", // space
 	toogleColors: "c",
 	toogleOvertime: "y",
+
+	toggleImage: "v",
+	uploadImage: "n",
 
 	enableDoublePress: true,
 	doubePressDelay: 500,
@@ -20,8 +28,12 @@ var config = {
 	endTime: 90 * 60, // in seconds
 
 	handleKey: function(event) {
-		if(document.activeElement.nodeName == "INPUT" || event.key == "F11"){
+		if(document.activeElement.nodeName == "INPUT" ||
+			document.activeElement.nodeName == "TEXTAREA" ||
+			event.key == "F11"){
 			// If we want to edit the teams names we don't grab the keyboard inputs
+			//var element = document.activeElement;
+			//element.style.height = element.scrollHeight+'px';
 			return;
 		}
 		event.preventDefault();
@@ -40,6 +52,18 @@ var config = {
 			case config.decPointRight:
 				game.score.addPoint(0, -1);
 			break;
+			case config.incTimeMinutes:
+					game.time.addMinutes(1);
+				break;
+			case config.decTimeMinutes:
+					game.time.addMinutes(-1);
+				break;
+			case config.incTimeSeconds:
+					game.time.addSeconds(1);
+				break;
+			case config.decTimeSeconds:
+				game.time.addSeconds(-1);
+			break;
 			case config.toogleOvertime:
 				game.time.endOverTime()
 			break;
@@ -56,19 +80,41 @@ var config = {
 			case config.toogleColors:
 				game.toggleColors();
 				break;
+			case config.toggleImage:
+				game.toggleImage();
+				break;
+			case config.uploadImage:
+				game.uploadImage();
+				break;
 		}
-	},
-
+	}
 };
 
 var game = {
 	colorBlack: true,
+	imageVisible: false,
 
 	logStatus: function() {
 		var minutesSeconds = this.time.convertToMinutesSeconds(this.time.currentTime);
 		var logMessage = minutesSeconds[0] + ":" + minutesSeconds[1] + " " + this.score.scoreLeft + ":" + this.score.scoreRight;
 		console.log(logMessage);
 		scoreboard.logStatus(logMessage);
+	},
+
+	toggleImage: function(){
+		if(this.imageVisible == false){
+			document.querySelector("#imageId").style.display = "block";
+			document.querySelector("main").style.display = "none";
+		}
+		else{
+			document.querySelector("#imageId").style.display = "none";
+			document.querySelector("main").style.display = "block";
+		}
+		this.imageVisible = !this.imageVisible;
+	},
+
+	uploadImage: function(){
+		document.getElementById("imageUploadId").click();
 	},
 
 	reset: function() {
@@ -83,8 +129,15 @@ var game = {
 		addPoint: function(left, right) {
 			this.scoreLeft += left;
 			this.scoreRight += right;
+
+			if(this.scoreLeft < 0 || this.scoreRight < 0){
+				if(this.scoreLeft < 0) this.scoreLeft = 0;
+				if(this.scoreRight < 0) this.scoreRight = 0;
+			}
+			else{
+				game.logStatus();
+			}
 			scoreboard.updateScore(this.scoreLeft, this.scoreRight);
-			game.logStatus();
 		},
 
 		reset: function() {
@@ -108,6 +161,10 @@ var game = {
 		nodes.forEach(function(node){
 			node.style.color = foregroundColor;
 			node.style.backgroundColor = backgroundColor;
+		});
+		nodes = document.querySelectorAll("textarea");
+		nodes.forEach(function(node){
+			node.style.color = foregroundColor;
 		});
 	},
 
@@ -160,8 +217,20 @@ var game = {
 			}
 		},
 
-		start: function() {
-			this.running = true;
+		addMinutes: function(val){
+			this.currentTime = this.currentTime + val * 1000 * 60;
+			if(this.currentTime <= 0) this.currentTime = 0;
+			scoreboard.updateTime(game.time.convertToMinutesSeconds(game.time.currentTime));
+		},
+
+		addSeconds: function(val){
+			this.currentTime = this.currentTime + val * 1000;
+			if(this.currentTime <= 0) this.currentTime = 0;
+			scoreboard.updateTime(game.time.convertToMinutesSeconds(game.time.currentTime));
+		},
+
+		start: function(running=true) {
+			this.running = running;
 			this.lastTimestamp = Date.now() - this.currentTime;
 			this.lastOverTimestamp = Date.now() - this.currentOvertime;
 			this.update();
@@ -266,4 +335,13 @@ var scoreboard = {
 
 window.onload = function(){
 	document.onkeypress = config.handleKey;
+
+	document.getElementById("imageUploadId").onchange = function () {
+		var reader = new FileReader();
+		reader.onload = function (e) {
+			// get loaded data and render thumbnail
+			document.getElementById("imageShowId").src = e.target.result;
+		};
+		reader.readAsDataURL(this.files[0]);
+	};
 }
